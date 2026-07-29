@@ -1,7 +1,6 @@
 from collections import deque
 import time
 
-# Graph with Edge Cost
 def add_edge(g, a, b, cost):
     g.setdefault(a, []).append((b, cost))
     g.setdefault(b, []).append((a, cost))
@@ -18,13 +17,10 @@ add_edge(graph, "Admin Office", "Library", 4)
 add_edge(graph, "Block A", "Library", 3)
 add_edge(graph, "Block A", "Block B", 4)
 
-start = "Main Gate"
-goal = "Library"
 
 def bfs(graph, start, goal):
     start_time = time.perf_counter()
-
-    queue = deque([(start, [start], 0)])   # (node, path, cost)
+    queue = deque([(start, [start], 0)])
     visited = set()
     expanded_nodes = 0
 
@@ -33,35 +29,29 @@ def bfs(graph, start, goal):
 
         if node in visited:
             continue
-
         visited.add(node)
         expanded_nodes += 1
 
         if node == goal:
             end_time = time.perf_counter()
-            return (
-                path,
-                cost,
-                expanded_nodes,
-                end_time - start_time
-            )
+            return path, cost, expanded_nodes, end_time - start_time
 
         for neighbour, edge_cost in graph[node]:
             if neighbour not in visited:
-                queue.append((
-                    neighbour,
-                    path + [neighbour],
-                    cost + edge_cost
-                ))
+                queue.append((neighbour, path + [neighbour], cost + edge_cost))
 
-    return None
+    return None  # no path found
 
-# Run BFS
-path, total_cost, expanded_nodes, execution_time = bfs(graph, start, goal)
 
-print("===== BFS Result =====")
-print("Shortest Route:", " -> ".join(path))
-print("Number of Moves:", len(path) - 1)
-print("Total Path Cost:", total_cost)
-print("Expanded Nodes:", expanded_nodes)
-print(f"Execution Time: {execution_time:.6f} seconds")
+if __name__ == "__main__":
+    result = bfs(graph, "Main Gate", "Library")
+    if result is None:
+        print("No route found.")
+    else:
+        path, total_cost, expanded_nodes, execution_time = result
+        print("===== BFS Result =====")
+        print("Shortest Route:", " -> ".join(path))
+        print("Number of Moves:", len(path) - 1)
+        print("Total Path Cost:", total_cost)
+        print("Expanded Nodes:", expanded_nodes)
+        print(f"Execution Time: {execution_time:.6f} seconds")

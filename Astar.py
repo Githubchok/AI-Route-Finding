@@ -1,7 +1,6 @@
 import heapq
 import time
 
-# Graph with edge costs
 def add_edge(g, a, b, cost):
     g.setdefault(a, []).append((b, cost))
     g.setdefault(b, []).append((a, cost))
@@ -18,7 +17,6 @@ add_edge(graph, "Admin Office", "Library", 4)
 add_edge(graph, "Block A", "Library", 3)
 add_edge(graph, "Block A", "Block B", 4)
 
-# Heuristic values
 heuristic = {
     "Main Gate": 9,
     "Student Centre": 7,
@@ -31,12 +29,9 @@ heuristic = {
 }
 
 
-def astar(start, goal):
+def astar(graph, start, goal, verbose=False):
     start_time = time.perf_counter()
-
-    pq = []
-    heapq.heappush(pq, (heuristic[start], 0, start, [start]))
-
+    pq = [(heuristic[start], 0, start, [start])]
     visited = {}
     nodes_expanded = 0
 
@@ -45,31 +40,34 @@ def astar(start, goal):
 
         if current in visited and visited[current] <= g:
             continue
-
         visited[current] = g
         nodes_expanded += 1
 
         if current == goal:
             end_time = time.perf_counter()
-
-            print("\n===== A* Search Result =====")
-            print("Optimal Route :", " -> ".join(path))
-            print("Path Cost     :", g)
-            print("Nodes Expanded:", nodes_expanded)
-            print(f"Execution Time: {end_time - start_time:.6f} seconds")
-            return
+            return path, g, nodes_expanded, end_time - start_time
 
         for neighbor, cost in graph[current]:
             new_g = g + cost
             new_h = heuristic[neighbor]
             new_f = new_g + new_h
 
-            print(f"{current} -> {neighbor}: f(n) = {new_g} + {new_h} = {new_f}")
+            if verbose:
+                print(f"{current} -> {neighbor}: f(n) = {new_g} + {new_h} = {new_f}")
 
-            heapq.heappush(
-                pq,
-                (new_f, new_g, neighbor, path + [neighbor])
-            )
+            heapq.heappush(pq, (new_f, new_g, neighbor, path + [neighbor]))
+
+    return None  # no path found
 
 
-astar("Main Gate", "Library")
+if __name__ == "__main__":
+    result = astar(graph, "Main Gate", "Library")
+    if result is None:
+        print("No route found.")
+    else:
+        path, total_cost, expanded_nodes, execution_time = result
+        print("===== A* Search Result =====")
+        print("Optimal Route :", " -> ".join(path))
+        print("Path Cost     :", total_cost)
+        print("Nodes Expanded:", expanded_nodes)
+        print(f"Execution Time: {execution_time:.6f} seconds")
